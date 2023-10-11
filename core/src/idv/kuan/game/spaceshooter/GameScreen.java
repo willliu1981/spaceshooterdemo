@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -16,8 +18,13 @@ public class GameScreen implements Screen {
 
     //graphics
     private SpriteBatch batch;
+    private TextureAtlas textureAtlas;
     private Texture background;
-    private Texture[] backgrounds;
+    private TextureRegion[] backgrounds;
+
+    private TextureRegion playerShipTxtr, enemyShipTxtr, playerShipShieldTxtr, enemyShipShieldTxtr,
+            playerShipLaserTxtr, enemyShipLaserTxtr;
+
 
     //world parameters
     private final int WORLD_WIDTH = 72;
@@ -29,9 +36,16 @@ public class GameScreen implements Screen {
     private float[] backgroungOffsets;
     private float backgroundMaxScrollingSpeed;
 
+    //game objects
+    Ship playerShip, enemyShip;
+
+
     public GameScreen() {
         camera = new OrthographicCamera();
         viewport = new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
+
+        //set up pictures
+        textureAtlas = new TextureAtlas("spaceshooter.pack");
 
         //*
         background = new Texture("space01.jpg");
@@ -41,22 +55,39 @@ public class GameScreen implements Screen {
         //*/
 
         //*
-        backgrounds = new Texture[4];
-        backgrounds[0] = new Texture("space01.jpg");
-        backgrounds[1] = new Texture("Starspace01b.png");
-        backgrounds[2] = new Texture("S2b.png");
-        backgrounds[3] = new Texture("S3b.png");
+        backgrounds = new TextureRegion[4];
+        backgrounds[0] = textureAtlas.findRegion("space01");
+        backgrounds[1] = textureAtlas.findRegion("Starspace01b");
+        backgrounds[2] = textureAtlas.findRegion("S2b");
+        backgrounds[3] = textureAtlas.findRegion("S3b");
+
+        playerShipTxtr=textureAtlas.findRegion("ship_sidesA");
+        enemyShipTxtr=textureAtlas.findRegion("enemy_A");
+
+        playerShipShieldTxtr=textureAtlas.findRegion("meteor_largeb");
+        enemyShipShieldTxtr=textureAtlas.findRegion("meteor_smallb");
+
+        playerShipLaserTxtr=textureAtlas.findRegion("effect_yellow");
+        enemyShipLaserTxtr=textureAtlas.findRegion("effect_purple");
+
 
         backgroungOffsets = new float[4];
 
         //*/
 
+        //set up game objects
+        playerShip = new Ship(2, 10, 10, 10, WORLD_WIDTH / 2, WORLD_HEIGHT / 4,
+                playerShipTxtr, playerShipShieldTxtr);
+
+        enemyShip = new Ship(2, 3, 10, 10, WORLD_WIDTH / 2, WORLD_HEIGHT * 3 / 4,
+                playerShipTxtr, playerShipShieldTxtr);
+
+
+
         backgroundMaxScrollingSpeed = (float) WORLD_HEIGHT / 4;
 
         batch = new SpriteBatch();
     }
-
-
 
 
     @Override
@@ -79,6 +110,13 @@ public class GameScreen implements Screen {
 
 
         renderBackground1(delta);
+
+        //ship
+        playerShip.draw(batch);
+        enemyShip.draw(batch);
+
+
+
 
 
         batch.end();
