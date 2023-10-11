@@ -61,12 +61,16 @@ public class GameScreen implements Screen {
         backgrounds[2] = textureAtlas.findRegion("S2b");
         backgrounds[3] = textureAtlas.findRegion("S3b");
 
+        //ship
         playerShipTxtr=textureAtlas.findRegion("ship_sidesA");
         enemyShipTxtr=textureAtlas.findRegion("enemy_A");
+        //enemyShipTxtr.flip(false,true);
 
+        //shield
         playerShipShieldTxtr=textureAtlas.findRegion("meteor_largeb");
         enemyShipShieldTxtr=textureAtlas.findRegion("meteor_smallb");
 
+        //laser
         playerShipLaserTxtr=textureAtlas.findRegion("effect_yellow");
         enemyShipLaserTxtr=textureAtlas.findRegion("effect_purple");
 
@@ -80,7 +84,7 @@ public class GameScreen implements Screen {
                 playerShipTxtr, playerShipShieldTxtr);
 
         enemyShip = new Ship(2, 3, 10, 10, WORLD_WIDTH / 2, WORLD_HEIGHT * 3 / 4,
-                playerShipTxtr, playerShipShieldTxtr);
+                enemyShipTxtr, enemyShipShieldTxtr);
 
 
 
