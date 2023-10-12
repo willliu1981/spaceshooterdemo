@@ -10,6 +10,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 public class GameScreen implements Screen {
 
     //screen
@@ -37,7 +40,9 @@ public class GameScreen implements Screen {
     private float backgroundMaxScrollingSpeed;
 
     //game objects
-    Ship playerShip, enemyShip;
+    private Ship playerShip, enemyShip;
+    private LinkedList<Laser> playerLserList;
+    private LinkedList<Laser> enemyLserList;
 
 
     public GameScreen() {
@@ -62,17 +67,19 @@ public class GameScreen implements Screen {
         backgrounds[3] = textureAtlas.findRegion("S3b");
 
         //ship
-        playerShipTxtr=textureAtlas.findRegion("ship_sidesA");
-        enemyShipTxtr=textureAtlas.findRegion("enemy_A");
+        playerShipTxtr = textureAtlas.findRegion("ship_sidesA");
+        enemyShipTxtr = textureAtlas.findRegion("enemy_A");
+        enemyShipTxtr.flip(false,true);
         //enemyShipTxtr.flip(false,true);
 
         //shield
-        playerShipShieldTxtr=textureAtlas.findRegion("meteor_largeb");
-        enemyShipShieldTxtr=textureAtlas.findRegion("meteor_smallb");
+        playerShipShieldTxtr = textureAtlas.findRegion("meteor_largeb");
+        enemyShipShieldTxtr = textureAtlas.findRegion("meteor_smallb");
 
         //laser
-        playerShipLaserTxtr=textureAtlas.findRegion("effect_yellow");
-        enemyShipLaserTxtr=textureAtlas.findRegion("effect_purple");
+        playerShipLaserTxtr = textureAtlas.findRegion("effect_yellow");
+        enemyShipLaserTxtr = textureAtlas.findRegion("effect_purple");
+        enemyShipLaserTxtr.flip(false,true);
 
 
         backgroungOffsets = new float[4];
@@ -80,12 +87,18 @@ public class GameScreen implements Screen {
         //*/
 
         //set up game objects
-        playerShip = new Ship(2, 10, 10, 10, WORLD_WIDTH / 2, WORLD_HEIGHT / 4,
-                playerShipTxtr, playerShipShieldTxtr);
+        playerShip = new PlayerShip(WORLD_WIDTH / 2, WORLD_HEIGHT * 1 / 4, 10, 10,
+                2, 3,
+                0.9f, 3, 45, 0.5f,
+                playerShipTxtr, playerShipShieldTxtr, playerShipLaserTxtr);
 
-        enemyShip = new Ship(2, 3, 10, 10, WORLD_WIDTH / 2, WORLD_HEIGHT * 3 / 4,
-                enemyShipTxtr, enemyShipShieldTxtr);
+        enemyShip = new EnemyShip(WORLD_WIDTH / 2, WORLD_HEIGHT * 3 / 4, 10, 10,
+                2, 3,
+                0.9f, 3, 45, 0.5f,
+                enemyShipTxtr, enemyShipShieldTxtr, enemyShipLaserTxtr);
 
+        playerLserList = new LinkedList<>();
+        enemyLserList = new LinkedList<>();
 
 
         backgroundMaxScrollingSpeed = (float) WORLD_HEIGHT / 4;
@@ -100,27 +113,53 @@ public class GameScreen implements Screen {
 
         batch.begin();
 
+        playerShip.update(delta);
+        enemyShip.update(delta);
 
         //scrolling background
-        /*
-        backgroungOffset++;
-        if (backgroungOffset % WORLD_HEIGHT == 0) {
-            backgroungOffset = 0;
-        }
-        batch.draw(background, 0, -backgroungOffset, WORLD_WIDTH, WORLD_HEIGHT);
-        batch.draw(background, 0, -backgroungOffset+WORLD_HEIGHT, WORLD_WIDTH, WORLD_HEIGHT);
-
-         //*/
-
-
         renderBackground1(delta);
 
         //ship
         playerShip.draw(batch);
         enemyShip.draw(batch);
 
+        //lasers
+        //create new Lasers
+        if (playerShip.canFireLaser()) {
+            Laser[] lasers = playerShip.fireLasers();
+            for (Laser laser : lasers) {
+                playerLserList.add(laser);
+            }
+        }
 
+        if (enemyShip.canFireLaser()) {
+            Laser[] lasers = enemyShip.fireLasers();
+            for (Laser laser : lasers) {
+                enemyLserList.add(laser);
+            }
+        }
 
+        //draw lasers
+        //remove old lasers
+        ListIterator<Laser> iterator = playerLserList.listIterator();
+        while (iterator.hasNext()) {
+            Laser laser = iterator.next();
+            laser.draw(batch);
+            laser.yPos += laser.movementSpeed * delta;
+            if (laser.yPos > WORLD_HEIGHT) {
+                iterator.remove();
+            }
+        }
+
+        iterator = enemyLserList.listIterator();
+        while (iterator.hasNext()) {
+            Laser laser = iterator.next();
+            laser.draw(batch);
+            laser.yPos -= laser.movementSpeed * delta;
+            if (laser.yPos + laser.height < 0) {
+                iterator.remove();
+            }
+        }
 
 
         batch.end();
