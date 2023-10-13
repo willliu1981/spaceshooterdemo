@@ -1,5 +1,6 @@
 package idv.kuan.game.spaceshooter;
 
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class PlayerShip extends Ship {
@@ -10,6 +11,11 @@ public class PlayerShip extends Ship {
                       TextureRegion shieldtexture,
                       TextureRegion laserTexture) {
         super(xCenter, yCenter, width, height, movementSpeed, shield, laserWidth, laserHeight, laserMovementSpeed, timeBetweenShots, shipTexture, shieldtexture, laserTexture);
+    }
+
+    @Override
+    public void drawShied(Batch batch) {
+        batch.draw(shieldtexture, xPos-width*0.2f, yPos-height*0.6f, width*1.4f, height*2f);
     }
 
     @Override

@@ -52,11 +52,14 @@ public abstract class Ship {
     }
 
     void draw(Batch batch) {
-        batch.draw(shipTexture, xPos, yPos, width, height);
         if (shield > 0) {
-            batch.draw(shieldtexture, xPos, yPos, width, height);
+            drawShied(batch);
         }
+        batch.draw(shipTexture, xPos, yPos, width, height);
     }
+
+    public abstract void drawShied(Batch batch);
+
 
     public abstract Laser[] fireLasers();
 }

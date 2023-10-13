@@ -73,8 +73,8 @@ public class GameScreen implements Screen {
         //enemyShipTxtr.flip(false,true);
 
         //shield
-        playerShipShieldTxtr = textureAtlas.findRegion("meteor_largeb");
-        enemyShipShieldTxtr = textureAtlas.findRegion("meteor_smallb");
+        playerShipShieldTxtr = textureAtlas.findRegion("meteor_smallb");
+        enemyShipShieldTxtr = textureAtlas.findRegion("meteor_largeb");
 
         //laser
         playerShipLaserTxtr = textureAtlas.findRegion("effect_yellow");
