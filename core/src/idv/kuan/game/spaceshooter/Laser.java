@@ -2,6 +2,7 @@ package idv.kuan.game.spaceshooter;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 
 public class Laser {
     //pos ant dim
@@ -28,5 +29,10 @@ public class Laser {
     public void draw (Batch batch){
         batch.draw(textureRegion,xPos-width/2,yPos,width,height);
     }
+
+    public Rectangle getBoundingBox(){
+        return new Rectangle(xPos,yPos,width,height);
+    }
+
 
 }

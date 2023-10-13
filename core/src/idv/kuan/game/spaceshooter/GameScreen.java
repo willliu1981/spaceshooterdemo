@@ -88,12 +88,12 @@ public class GameScreen implements Screen {
 
         //set up game objects
         playerShip = new PlayerShip(WORLD_WIDTH / 2, WORLD_HEIGHT * 1 / 4, 10, 10,
-                2, 3,
+                2, 10,
                 0.9f, 3, 45, 0.5f,
                 playerShipTxtr, playerShipShieldTxtr, playerShipLaserTxtr);
 
         enemyShip = new EnemyShip(WORLD_WIDTH / 2, WORLD_HEIGHT * 3 / 4, 10, 10,
-                2, 3,
+                2, 5 ,
                 0.9f, 3, 45, 0.5f,
                 enemyShipTxtr, enemyShipShieldTxtr, enemyShipLaserTxtr);
 
@@ -161,9 +161,61 @@ public class GameScreen implements Screen {
             }
         }
 
+        //laser
+        renderRasers(delta);
+
+        //explosions
+        detectCollisions();
 
         batch.end();
 
+    }
+
+    private  void detectCollisions(){
+        //for each player laser,check whether it intersects an enemy ship
+        ListIterator<Laser> iterator = playerLserList.listIterator();
+        while (iterator.hasNext()) {
+            Laser laser = iterator.next();
+            if(enemyShip.intersects(laser.getBoundingBox())){
+                enemyShip.hit(laser);
+                iterator.remove();
+            }
+        }
+
+        //for each enemy laser,check whether it intersects an player ship
+          iterator = enemyLserList.listIterator();
+        while (iterator.hasNext()) {
+            Laser laser = iterator.next();
+            if(playerShip.intersects(laser.getBoundingBox())){
+                playerShip.hit(laser);
+                iterator.remove();
+            }
+        }
+
+    }
+
+    private  void renderRasers(float delta){
+        //draw lasers
+        //remove old lasers
+        ListIterator<Laser> iterator = playerLserList.listIterator();
+        while (iterator.hasNext()) {
+            Laser laser = iterator.next();
+            laser.draw(batch);
+            laser.yPos += laser.movementSpeed * delta;
+            if (laser.yPos > WORLD_HEIGHT) {
+                iterator.remove();
+            }
+        }
+
+        iterator = enemyLserList.listIterator();
+        while (iterator.hasNext()) {
+            Laser laser = iterator.next();
+            laser.draw(batch);
+            laser.yPos -= laser.movementSpeed * delta;
+            if (laser.yPos + laser.height < 0) {
+                iterator.remove();
+            }
+        }
     }
 
 

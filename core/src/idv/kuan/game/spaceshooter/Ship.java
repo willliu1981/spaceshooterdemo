@@ -2,6 +2,7 @@ package idv.kuan.game.spaceshooter;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 
 public abstract class Ship {
     //ship characteristics
@@ -9,8 +10,7 @@ public abstract class Ship {
     int shield;
 
     //position & dimension
-    float xPos, yPos;
-    float width, height;
+    protected Rectangle boundingBox;
 
     //laser information
     float laserWidth, laserHeight;
@@ -30,10 +30,7 @@ public abstract class Ship {
             TextureRegion shipTexture, TextureRegion shieldtexture, TextureRegion laserTexture) {
         this.movementSpeed = movementSpeed;
         this.shield = shield;
-        this.xPos = xCenter - width / 2;
-        this.yPos = yCenter - height / 2;
-        this.width = width;
-        this.height = height;
+        this.boundingBox = new Rectangle(xCenter - width / 2, yCenter - height / 2, width, height);
         this.laserWidth = laserWidth;
         this.laserHeight = laserHeight;
         this.laserMovementSpeed = laserMovementSpeed;
@@ -51,15 +48,27 @@ public abstract class Ship {
         return timeSinceLastShot - timeBetweenShots > 0;
     }
 
-    void draw(Batch batch) {
-        if (shield > 0) {
-            drawShied(batch);
-        }
-        batch.draw(shipTexture, xPos, yPos, width, height);
-    }
 
     public abstract void drawShied(Batch batch);
 
 
     public abstract Laser[] fireLasers();
+
+    public boolean intersects(Rectangle otherRectangle) {
+        return this.boundingBox.overlaps(otherRectangle);
+    }
+
+    void draw(Batch batch) {
+        if (shield > 0) {
+            drawShied(batch);
+        }
+        batch.draw(shipTexture, boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
+
+    }
+
+    public void hit(Laser laser) {
+        if (shield > 0) {
+            shield--;
+        }
+    }
 }

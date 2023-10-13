@@ -15,14 +15,16 @@ public class EnemyShip extends Ship {
 
     @Override
     public void drawShied(Batch batch) {
-        batch.draw(shieldtexture, xPos-width*0.15f, yPos-height*0.1f, width*1.30f, height*1.30f);
+        batch.draw(shieldtexture, boundingBox.x - boundingBox.width * 0.15f, boundingBox.y - boundingBox.height * 0.1f,
+                boundingBox.width * 1.30f, boundingBox.height * 1.30f);
     }
 
 
     @Override
     public Laser[] fireLasers() {
         Laser[] laser = new Laser[1];
-        laser[0] = new Laser(xPos + width * 0.5f, yPos - height * 0.01f - laserHeight * 0.99f, laserWidth, laserHeight, laserMovementSpeed, laserTexture);
+        laser[0] = new Laser(boundingBox.x + boundingBox.width * 0.5f, boundingBox.y - boundingBox.height * 0.01f - laserHeight * 0.99f,
+                laserWidth, laserHeight, laserMovementSpeed, laserTexture);
 
         timeSinceLastShot = 0;
 
