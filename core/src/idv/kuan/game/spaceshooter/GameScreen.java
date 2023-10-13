@@ -139,14 +139,15 @@ public class GameScreen implements Screen {
             }
         }
 
+
         //draw lasers
         //remove old lasers
         ListIterator<Laser> iterator = playerLserList.listIterator();
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
             laser.draw(batch);
-            laser.yPos += laser.movementSpeed * delta;
-            if (laser.yPos > WORLD_HEIGHT) {
+            laser.boundingBox.y += laser.movementSpeed * delta;
+            if (laser.boundingBox.y > WORLD_HEIGHT) {
                 iterator.remove();
             }
         }
@@ -155,8 +156,8 @@ public class GameScreen implements Screen {
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
             laser.draw(batch);
-            laser.yPos -= laser.movementSpeed * delta;
-            if (laser.yPos + laser.height < 0) {
+            laser.boundingBox.y -= laser.movementSpeed * delta;
+            if (laser.boundingBox.y + laser.boundingBox.height < 0) {
                 iterator.remove();
             }
         }
@@ -201,8 +202,8 @@ public class GameScreen implements Screen {
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
             laser.draw(batch);
-            laser.yPos += laser.movementSpeed * delta;
-            if (laser.yPos > WORLD_HEIGHT) {
+            laser.boundingBox.y += laser.movementSpeed * delta;
+            if (laser.boundingBox.y > WORLD_HEIGHT) {
                 iterator.remove();
             }
         }
@@ -211,8 +212,8 @@ public class GameScreen implements Screen {
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
             laser.draw(batch);
-            laser.yPos -= laser.movementSpeed * delta;
-            if (laser.yPos + laser.height < 0) {
+            laser.boundingBox.y -= laser.movementSpeed * delta;
+            if (laser.boundingBox.y + laser.boundingBox.height < 0) {
                 iterator.remove();
             }
         }
