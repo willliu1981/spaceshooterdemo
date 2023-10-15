@@ -183,55 +183,27 @@ public class GameScreen implements Screen {
         //strategy: determine the max distance the ship can move
         //check each key that matters and move accordingly
 
-        float xChange = 0, yChange = 0;
         float movementDistance = playerShip.movementSpeed * delta;
 
-
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            playerShip.translate(Math.min(playerShip.boundingBox.x, movementDistance),
+                    Input.Keys.LEFT);
+        }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            xChange = Math.min(WORLD_WIDTH - playerShip.boundingBox.x - playerShip.boundingBox.width, movementDistance);
-            playerShip.translate(xChange, 0);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            xChange = Math.min(playerShip.boundingBox.x, movementDistance);
-            playerShip.translate(-xChange, 0);
+            playerShip.translate(Math.min(WORLD_WIDTH - playerShip.boundingBox.x - playerShip.boundingBox.width, movementDistance),
+                    Input.Keys.RIGHT);
         }
-
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            playerShip.translate(Math.min(playerShip.boundingBox.y, movementDistance),
+                    Input.Keys.DOWN);
+        }
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            yChange = Math.min(WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height, movementDistance);
-            playerShip.translate(0, yChange);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            yChange = Math.min(playerShip.boundingBox.y, movementDistance);
-            playerShip.translate(0, -yChange);
+            playerShip.translate(Math.min(WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height, movementDistance),
+                    Input.Keys.UP);
         }
 
     }
 
-    private void detectInput2(float delta) {
-        // keyboard input
-
-
-        //strategy: determine the max distance the ship can move
-        //check each key that matters and move accordingly
-
-        float leftLimit, rightLimit, upLimit, downLimit;
-        leftLimit = -playerShip.boundingBox.x;
-        downLimit = -playerShip.boundingBox.y;
-        rightLimit = WORLD_WIDTH - playerShip.boundingBox.x - playerShip.boundingBox.width;
-        upLimit = WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height;
-
-        if (Gdx.input.isKeyPressed((Input.Keys.RIGHT)) && rightLimit > 0) {
-            playerShip.translate(Math.min(playerShip.movementSpeed * delta, rightLimit), 0f);
-        }
-        if (Gdx.input.isKeyPressed((Input.Keys.UP)) && upLimit > 0) {
-            playerShip.translate(0f, Math.min(playerShip.movementSpeed * delta, upLimit));
-        }
-        if (Gdx.input.isKeyPressed((Input.Keys.LEFT)) && leftLimit < 0) {
-            playerShip.translate(Math.max(-playerShip.movementSpeed * delta, leftLimit), 0f);
-        }
-        if (Gdx.input.isKeyPressed((Input.Keys.DOWN)) && downLimit < 0) {
-            playerShip.translate(0f, Math.max(-playerShip.movementSpeed * delta, downLimit));
-        }
-
-    }
 
     private void detectCollisions() {
         //for each player laser,check whether it intersects an enemy ship

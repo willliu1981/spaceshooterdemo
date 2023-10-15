@@ -78,19 +78,19 @@ public abstract class Ship {
         boundingBox.setPosition(boundingBox.x + xChange, boundingBox.y + yChange);
     }
 
-    public void translate2(float change, int direction) {
+    public void translate(float change, int direction) {
         switch (direction) {
             case Input.Keys.LEFT:
-
+                boundingBox.setX(boundingBox.x - change);
                 break;
             case Input.Keys.RIGHT:
-
+                boundingBox.setX(boundingBox.x + change);
                 break;
             case Input.Keys.UP:
-
+                boundingBox.setY(boundingBox.y + change);
                 break;
             case Input.Keys.DOWN:
-
+                boundingBox.setY(boundingBox.y - change);
                 break;
 
 
