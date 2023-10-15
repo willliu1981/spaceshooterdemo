@@ -1,5 +1,7 @@
 package idv.kuan.game.spaceshooter;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -69,7 +71,7 @@ public class GameScreen implements Screen {
         //ship
         playerShipTxtr = textureAtlas.findRegion("ship_sidesA");
         enemyShipTxtr = textureAtlas.findRegion("enemy_A");
-        enemyShipTxtr.flip(false,true);
+        enemyShipTxtr.flip(false, true);
         //enemyShipTxtr.flip(false,true);
 
         //shield
@@ -79,7 +81,7 @@ public class GameScreen implements Screen {
         //laser
         playerShipLaserTxtr = textureAtlas.findRegion("effect_yellow");
         enemyShipLaserTxtr = textureAtlas.findRegion("effect_purple");
-        enemyShipLaserTxtr.flip(false,true);
+        enemyShipLaserTxtr.flip(false, true);
 
 
         backgroungOffsets = new float[4];
@@ -88,12 +90,12 @@ public class GameScreen implements Screen {
 
         //set up game objects
         playerShip = new PlayerShip(WORLD_WIDTH / 2, WORLD_HEIGHT * 1 / 4, 10, 10,
-                2, 10,
+                48, 10,
                 0.9f, 3, 45, 0.5f,
                 playerShipTxtr, playerShipShieldTxtr, playerShipLaserTxtr);
 
         enemyShip = new EnemyShip(WORLD_WIDTH / 2, WORLD_HEIGHT * 3 / 4, 10, 10,
-                2, 5 ,
+                2, 5,
                 0.9f, 3, 45, 0.5f,
                 enemyShipTxtr, enemyShipShieldTxtr, enemyShipLaserTxtr);
 
@@ -112,6 +114,8 @@ public class GameScreen implements Screen {
 
 
         batch.begin();
+
+        detectInput(delta);
 
         playerShip.update(delta);
         enemyShip.update(delta);
@@ -172,22 +176,79 @@ public class GameScreen implements Screen {
 
     }
 
-    private  void detectCollisions(){
+    private void detectInput(float delta) {
+        // keyboard input
+
+
+        //strategy: determine the max distance the ship can move
+        //check each key that matters and move accordingly
+
+        float xChange = 0, yChange = 0;
+        float movementDistance = playerShip.movementSpeed * delta;
+
+
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            xChange = Math.min(WORLD_WIDTH - playerShip.boundingBox.x - playerShip.boundingBox.width, movementDistance);
+            playerShip.translate(xChange, 0);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            xChange = Math.min(playerShip.boundingBox.x, movementDistance);
+            playerShip.translate(-xChange, 0);
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            yChange = Math.min(WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height, movementDistance);
+            playerShip.translate(0, yChange);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            yChange = Math.min(playerShip.boundingBox.y, movementDistance);
+            playerShip.translate(0, -yChange);
+        }
+
+    }
+
+    private void detectInput2(float delta) {
+        // keyboard input
+
+
+        //strategy: determine the max distance the ship can move
+        //check each key that matters and move accordingly
+
+        float leftLimit, rightLimit, upLimit, downLimit;
+        leftLimit = -playerShip.boundingBox.x;
+        downLimit = -playerShip.boundingBox.y;
+        rightLimit = WORLD_WIDTH - playerShip.boundingBox.x - playerShip.boundingBox.width;
+        upLimit = WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height;
+
+        if (Gdx.input.isKeyPressed((Input.Keys.RIGHT)) && rightLimit > 0) {
+            playerShip.translate(Math.min(playerShip.movementSpeed * delta, rightLimit), 0f);
+        }
+        if (Gdx.input.isKeyPressed((Input.Keys.UP)) && upLimit > 0) {
+            playerShip.translate(0f, Math.min(playerShip.movementSpeed * delta, upLimit));
+        }
+        if (Gdx.input.isKeyPressed((Input.Keys.LEFT)) && leftLimit < 0) {
+            playerShip.translate(Math.max(-playerShip.movementSpeed * delta, leftLimit), 0f);
+        }
+        if (Gdx.input.isKeyPressed((Input.Keys.DOWN)) && downLimit < 0) {
+            playerShip.translate(0f, Math.max(-playerShip.movementSpeed * delta, downLimit));
+        }
+
+    }
+
+    private void detectCollisions() {
         //for each player laser,check whether it intersects an enemy ship
         ListIterator<Laser> iterator = playerLserList.listIterator();
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
-            if(enemyShip.intersects(laser.getBoundingBox())){
+            if (enemyShip.intersects(laser.getBoundingBox())) {
                 enemyShip.hit(laser);
                 iterator.remove();
             }
         }
 
         //for each enemy laser,check whether it intersects an player ship
-          iterator = enemyLserList.listIterator();
+        iterator = enemyLserList.listIterator();
         while (iterator.hasNext()) {
             Laser laser = iterator.next();
-            if(playerShip.intersects(laser.getBoundingBox())){
+            if (playerShip.intersects(laser.getBoundingBox())) {
                 playerShip.hit(laser);
                 iterator.remove();
             }
@@ -195,7 +256,7 @@ public class GameScreen implements Screen {
 
     }
 
-    private  void renderRasers(float delta){
+    private void renderRasers(float delta) {
         //draw lasers
         //remove old lasers
         ListIterator<Laser> iterator = playerLserList.listIterator();

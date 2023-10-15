@@ -1,5 +1,7 @@
 package idv.kuan.game.spaceshooter;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -70,5 +72,29 @@ public abstract class Ship {
         if (shield > 0) {
             shield--;
         }
+    }
+
+    public void translate(float xChange, float yChange) {
+        boundingBox.setPosition(boundingBox.x + xChange, boundingBox.y + yChange);
+    }
+
+    public void translate2(float change, int direction) {
+        switch (direction) {
+            case Input.Keys.LEFT:
+
+                break;
+            case Input.Keys.RIGHT:
+
+                break;
+            case Input.Keys.UP:
+
+                break;
+            case Input.Keys.DOWN:
+
+                break;
+
+
+        }
+
     }
 }
