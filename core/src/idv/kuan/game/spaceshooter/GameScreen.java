@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -17,6 +18,7 @@ import java.util.ListIterator;
 
 public class GameScreen implements Screen {
 
+    private static final float TOUCH_MOVEMENT_THRESHOLD = 0.5f;
     //screen
     private Camera camera;
     private Viewport viewport;
@@ -200,6 +202,50 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             playerShip.translate(Math.min(WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height, movementDistance),
                     Input.Keys.UP);
+        }
+
+
+        // touch input(aso mouse)
+        if (Gdx.input.isTouched()) {
+            //get this screen position of the touch
+            float xTouchPixels = Gdx.input.getX();
+            float yTouchPixels = Gdx.input.getY();
+
+            //convert to world position
+            Vector2 touchPoint = new Vector2(xTouchPixels, yTouchPixels);
+            touchPoint = viewport.unproject(touchPoint);
+
+            //calculate the x and y differences
+            Vector2 playerShipCenter = new Vector2(playerShip.boundingBox.x + playerShip.boundingBox.width / 2,
+                    playerShip.boundingBox.y + playerShip.boundingBox.height / 2);
+
+            float touchDistance = touchPoint.dst(playerShipCenter);
+
+            if (touchDistance > TOUCH_MOVEMENT_THRESHOLD) {
+                float xToucnDifference = touchPoint.x - playerShipCenter.x;
+                float yToucnDifference = touchPoint.y - playerShipCenter.y;
+
+                //scale to the maximum speed of the ship
+                float xMove = xToucnDifference / touchDistance * playerShip.movementSpeed * delta;
+                float yMove = yToucnDifference / touchDistance * playerShip.movementSpeed * delta;
+
+                if (xMove > 0) {
+                    xMove = Math.min(xMove, WORLD_WIDTH - playerShip.boundingBox.x - playerShip.boundingBox.width);
+                } else {
+                    xMove = Math.max(xMove, -playerShip.boundingBox.x);
+                }
+
+                if (yMove > 0) {
+                    yMove = Math.min(yMove, WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height);
+                } else {
+                    yMove = Math.max(yMove, -playerShip.boundingBox.y);
+                }
+
+                playerShip.translate(xMove, yMove);
+
+            }
+
+
         }
 
     }
