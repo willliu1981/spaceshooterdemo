@@ -19,6 +19,10 @@ public class EnemyShip extends Ship {
                 boundingBox.width * 1.30f, boundingBox.height * 1.30f);
     }
 
+    @Override
+    public void update(float deltaTime) {
+        super.update(deltaTime);
+    }
 
     @Override
     public Laser[] fireLasers() {

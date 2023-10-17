@@ -25,6 +25,11 @@ public class SpaceShooter extends Game {
 	@Override
 	public void render() {
 		super.render();
+
+		if(gameScreen.isGameOver){
+			gameScreen=new GameScreen();
+			setScreen(gameScreen);
+		}
 	}
 
 	@Override

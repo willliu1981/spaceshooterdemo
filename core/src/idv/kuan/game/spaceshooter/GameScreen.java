@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -32,6 +33,8 @@ public class GameScreen implements Screen {
     private TextureRegion playerShipTxtr, enemyShipTxtr, playerShipShieldTxtr, enemyShipShieldTxtr,
             playerShipLaserTxtr, enemyShipLaserTxtr;
 
+    private Texture explodeTxtr;
+
 
     //world parameters
     private final int WORLD_WIDTH = 72;
@@ -44,12 +47,16 @@ public class GameScreen implements Screen {
     private float backgroundMaxScrollingSpeed;
 
     //game objects
-    private Ship playerShip, enemyShip;
+    private PlayerShip playerShip;
+    private EnemyShip enemyShip;
+    private LinkedList<EnemyShip> enemyShips;
     private LinkedList<Laser> playerLserList;
     private LinkedList<Laser> enemyLserList;
+    private LinkedList<Explosion> explosions = new LinkedList<>();
 
 
     public GameScreen() {
+
         camera = new OrthographicCamera();
         viewport = new StretchViewport(WORLD_WIDTH, WORLD_HEIGHT, camera);
 
@@ -90,7 +97,15 @@ public class GameScreen implements Screen {
 
         //*/
 
+        //explode
+        explodeTxtr = new Texture("explode01b.png");
+
         //set up game objects
+        playerLserList = new LinkedList<>();
+        enemyLserList = new LinkedList<>();
+        enemyShips = new LinkedList<>();
+        explosions = new LinkedList<>();
+
         playerShip = new PlayerShip(WORLD_WIDTH / 2, WORLD_HEIGHT * 1 / 4, 10, 10,
                 48, 10,
                 0.9f, 3, 45, 0.5f,
@@ -101,8 +116,8 @@ public class GameScreen implements Screen {
                 0.9f, 3, 45, 0.5f,
                 enemyShipTxtr, enemyShipShieldTxtr, enemyShipLaserTxtr);
 
-        playerLserList = new LinkedList<>();
-        enemyLserList = new LinkedList<>();
+
+        enemyShips.add(enemyShip);
 
 
         backgroundMaxScrollingSpeed = (float) WORLD_HEIGHT / 4;
@@ -110,6 +125,11 @@ public class GameScreen implements Screen {
         batch = new SpriteBatch();
     }
 
+    boolean isGameOver = false;
+
+    public boolean isGameOver() {
+        return isGameOver;
+    }
 
     @Override
     public void render(float delta) {
@@ -127,7 +147,8 @@ public class GameScreen implements Screen {
 
         //ship
         playerShip.draw(batch);
-        enemyShip.draw(batch);
+        enemyShips.forEach(s -> s.draw(batch));
+        //enemyShip.draw(batch);
 
         //lasers
         //create new Lasers
@@ -171,8 +192,11 @@ public class GameScreen implements Screen {
         //laser
         renderRasers(delta);
 
-        //explosions
+        //detect collisions between lasers and ships
         detectCollisions();
+
+        //explosions
+        updateAndRenderExplosion(delta);
 
         batch.end();
 
@@ -202,6 +226,10 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             playerShip.translate(Math.min(WORLD_HEIGHT / 2 - playerShip.boundingBox.y - playerShip.boundingBox.height, movementDistance),
                     Input.Keys.UP);
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            isGameOver = true;
         }
 
 
@@ -250,25 +278,54 @@ public class GameScreen implements Screen {
 
     }
 
+    private void updateAndRenderExplosion(float delta) {
+        ListIterator<Explosion> explosionListIterator = explosions.listIterator();
+        while (explosionListIterator.hasNext()) {
+            Explosion explosion = explosionListIterator.next();
+            explosion.update(delta);
+            if (explosion.isFinished()) {
+                explosionListIterator.remove();
+            } else {
+                explosion.draw(batch);
+            }
+        }
+    }
+
 
     private void detectCollisions() {
         //for each player laser,check whether it intersects an enemy ship
-        ListIterator<Laser> iterator = playerLserList.listIterator();
-        while (iterator.hasNext()) {
-            Laser laser = iterator.next();
-            if (enemyShip.intersects(laser.getBoundingBox())) {
-                enemyShip.hit(laser);
-                iterator.remove();
+        ListIterator<Laser> laserIterator = playerLserList.listIterator();
+        while (laserIterator.hasNext()) {
+            Laser laser = laserIterator.next();
+
+            ListIterator<EnemyShip> enemyShipListIterator = enemyShips.listIterator();
+            while (enemyShipListIterator.hasNext()) {
+                EnemyShip enemyShip = enemyShipListIterator.next();
+
+                if (enemyShip.intersects(laser.getBoundingBox())) {
+                    if (enemyShip.hitAndCheckDestroyed(laser)) {
+                        enemyShipListIterator.remove();
+                        explosions.add(new Explosion(explodeTxtr,
+                                new Rectangle(enemyShip.boundingBox.x - enemyShip.boundingBox.width / 2,
+                                        enemyShip.boundingBox.y - enemyShip.boundingBox.height / 2,
+                                        enemyShip.boundingBox.width * 2, enemyShip.boundingBox.height * 2
+                                ), 0.5f));
+                    }
+
+                    laserIterator.remove();
+                    break;
+                }
             }
+
         }
 
         //for each enemy laser,check whether it intersects an player ship
-        iterator = enemyLserList.listIterator();
-        while (iterator.hasNext()) {
-            Laser laser = iterator.next();
+        laserIterator = enemyLserList.listIterator();
+        while (laserIterator.hasNext()) {
+            Laser laser = laserIterator.next();
             if (playerShip.intersects(laser.getBoundingBox())) {
-                playerShip.hit(laser);
-                iterator.remove();
+                playerShip.hitAndCheckDestroyed(laser);
+                laserIterator.remove();
             }
         }
 
