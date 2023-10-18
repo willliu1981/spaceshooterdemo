@@ -54,6 +54,8 @@ public class GameScreen implements Screen {
     private LinkedList<Laser> enemyLserList;
     private LinkedList<Explosion> explosions = new LinkedList<>();
 
+    private MyInput inputProcessor;
+
 
     public GameScreen() {
 
@@ -121,6 +123,9 @@ public class GameScreen implements Screen {
 
 
         backgroundMaxScrollingSpeed = (float) WORLD_HEIGHT / 4;
+
+        inputProcessor = new MyInput(playerShip, WORLD_WIDTH, WORLD_HEIGHT);
+        Gdx.input.setInputProcessor(inputProcessor);
 
         batch = new SpriteBatch();
     }
@@ -209,6 +214,7 @@ public class GameScreen implements Screen {
         //strategy: determine the max distance the ship can move
         //check each key that matters and move accordingly
 
+        /*
         float movementDistance = playerShip.movementSpeed * delta;
 
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
@@ -231,6 +237,11 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
             isGameOver = true;
         }
+
+         */
+
+
+        inputProcessor.update(delta);
 
 
         // touch input(aso mouse)
