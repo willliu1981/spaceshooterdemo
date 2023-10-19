@@ -4,18 +4,23 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Locale;
 
 public class GameScreen implements Screen {
 
@@ -55,6 +60,9 @@ public class GameScreen implements Screen {
     private LinkedList<Explosion> explosions = new LinkedList<>();
 
     private MyInput inputProcessor;
+    private int score = 0;
+    private BitmapFont font;
+    float hudVerticalMargin, hudLeftx, hudRightX, hudCenterX, hudRow1Y, hudRow2Y, hudSectionWidth;
 
 
     public GameScreen() {
@@ -128,6 +136,35 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(inputProcessor);
 
         batch = new SpriteBatch();
+        prepareHUB();
+    }
+
+    private void prepareHUB() {
+
+        //Create a BitmapFont from font file
+        FreeTypeFontGenerator freeTypeFontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("AnkhSanctuary-nROx4.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter fontParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+        fontParameter.size = 72;
+        fontParameter.borderWidth = 3.6f;
+        fontParameter.color = new Color(1, 1, 1, 0.3f);
+
+        font = freeTypeFontGenerator.generateFont(fontParameter);
+
+        //scale the font to fit world
+        font.getData().setScale(0.08f);
+
+
+        //calculate hud margins,etc.
+        hudVerticalMargin = font.getCapHeight() / 2;
+        hudLeftx = hudVerticalMargin;
+        hudRightX = WORLD_WIDTH * 2 / 3 - hudLeftx;
+        hudCenterX = WORLD_WIDTH / 3;
+        hudRow1Y = WORLD_HEIGHT - hudVerticalMargin;
+        hudRow2Y = hudRow1Y - hudVerticalMargin - font.getCapHeight();
+        hudSectionWidth = WORLD_WIDTH / 3;
+
+
     }
 
     boolean isGameOver = false;
@@ -164,12 +201,14 @@ public class GameScreen implements Screen {
             }
         }
 
-        if (enemyShip.canFireLaser()) {
-            Laser[] lasers = enemyShip.fireLasers();
-            for (Laser laser : lasers) {
-                enemyLserList.add(laser);
+        enemyShips.forEach(s -> {
+            if (s.canFireLaser()) {
+                Laser[] lasers = s.fireLasers();
+                for (Laser laser : lasers) {
+                    enemyLserList.add(laser);
+                }
             }
-        }
+        });
 
 
         //draw lasers
@@ -203,7 +242,22 @@ public class GameScreen implements Screen {
         //explosions
         updateAndRenderExplosion(delta);
 
+        //hud rendering
+        updateAndRenderHUD();
+
         batch.end();
+
+    }
+
+    private void updateAndRenderHUD() {
+        //render top row labels
+        font.draw(batch, "Score", hudLeftx, hudRow1Y, hudSectionWidth, Align.left, false);
+        font.draw(batch, "Shield", hudCenterX, hudRow1Y, hudSectionWidth, Align.center, false);
+        font.draw(batch, "Lives", hudRightX, hudRow1Y, hudSectionWidth, Align.right, false);
+        //render second row values
+        font.draw(batch, String.format(Locale.getDefault(), "%06d", score), hudLeftx, hudRow2Y, hudSectionWidth, Align.left, false);
+        font.draw(batch, String.format(Locale.getDefault(), "%02d", playerShip.shield), hudCenterX, hudRow2Y, hudSectionWidth, Align.center, false);
+        font.draw(batch, String.format(Locale.getDefault(), "%02d", playerShip.llives), hudRightX, hudRow2Y, hudSectionWidth, Align.right, false);
 
     }
 
@@ -234,12 +288,13 @@ public class GameScreen implements Screen {
                     Input.Keys.UP);
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-            isGameOver = true;
-        }
+
 
          */
 
+        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            isGameOver = true;
+        }
 
         inputProcessor.update(delta);
 
@@ -253,6 +308,7 @@ public class GameScreen implements Screen {
             //convert to world position
             Vector2 touchPoint = new Vector2(xTouchPixels, yTouchPixels);
             touchPoint = viewport.unproject(touchPoint);
+            touchPoint.y += playerShip.boundingBox.height;
 
             //calculate the x and y differences
             Vector2 playerShipCenter = new Vector2(playerShip.boundingBox.x + playerShip.boundingBox.width / 2,
@@ -288,6 +344,7 @@ public class GameScreen implements Screen {
         }
 
     }
+
 
     private void updateAndRenderExplosion(float delta) {
         ListIterator<Explosion> explosionListIterator = explosions.listIterator();

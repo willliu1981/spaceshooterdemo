@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class PlayerShip extends Ship {
+    int llives;
+
     public PlayerShip(float xCenter, float yCenter, float width, float height,
                       float movementSpeed, int shield, float laserWidth, float laserHeight,
                       float laserMovementSpeed, float timeBetweenShots,
@@ -11,6 +13,7 @@ public class PlayerShip extends Ship {
                       TextureRegion shieldtexture,
                       TextureRegion laserTexture) {
         super(xCenter, yCenter, width, height, movementSpeed, shield, laserWidth, laserHeight, laserMovementSpeed, timeBetweenShots, shipTexture, shieldtexture, laserTexture);
+    llives=3;
     }
 
     @Override

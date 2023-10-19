@@ -11,6 +11,7 @@ public abstract class Ship {
     float movementSpeed;
     int shield;
 
+
     //position & dimension
     protected Rectangle boundingBox;
 
